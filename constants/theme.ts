@@ -5,13 +5,13 @@
 
 import { Platform } from 'react-native';
 
-const tintColorLight = '#0a7ea4';
-const tintColorDark = '#fff';
+const tintColorLight = '#2563eb'; // Azul vibrante
+const tintColorDark = '#00babc';  // Cyan clásico de 42
 
 export const Colors = {
   light: {
     text: '#11181C',
-    background: '#fff',
+    background: '#f8fafc', // Slate 50
     tint: tintColorLight,
     icon: '#687076',
     tabIconDefault: '#687076',
@@ -19,12 +19,35 @@ export const Colors = {
   },
   dark: {
     text: '#ECEDEE',
-    background: '#151718',
+    background: '#0f172a', // Slate 900 (El fondo principal de tu app)
     tint: tintColorDark,
     icon: '#9BA1A6',
     tabIconDefault: '#9BA1A6',
     tabIconSelected: tintColorDark,
   },
+  
+  // --- AÑADIDOS PARA SWIFTY COMPANION ---
+  ui: {
+    card: '#1e293b',       // Slate 800: Fondo de tarjetas (Wallet, Recent Searches)
+    input: '#334155',      // Slate 700: Fondo del buscador
+    border: '#334155',     // Bordes sutiles
+    
+    // Estados de Proyectos (Imagen 2)
+    success: '#22c55e',    // Verde (Validation / 100%)
+    successBg: 'rgba(34, 197, 94, 0.1)', // Fondo sutil verde
+    failure: '#ef4444',    // Rojo (Fail)
+    failureBg: 'rgba(239, 68, 68, 0.1)', // Fondo sutil rojo
+    warning: '#f59e0b',    // Amarillo (Waitlist / In progress)
+    textSecondary: '#94a3b8', // Texto gris claro (fechas, subtítulos)
+  },
+  
+  // Barras de Habilidades (Imagen 2)
+  skills: {
+    algo: '#8b5cf6',       // Violeta
+    unix: '#3b82f6',       // Azul
+    graphics: '#2dd4bf',   // Turquesa
+    web: '#f97316',        // Naranja
+  }
 };
 
 export const Fonts = Platform.select({
