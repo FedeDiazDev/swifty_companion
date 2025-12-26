@@ -22,7 +22,7 @@ export default function SearchScreen() {
         setIsLoading(true);
         setError(null);
         try {
-            const users = await searchUsers(searchQuery);
+            const users = await searchUsers(searchQuery.trim());
 
             const mappedPeers = users.map((u: User) => ({
                 id: u.id.toString(),
