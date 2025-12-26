@@ -1,0 +1,14 @@
+services:
+  app:
+    build: .
+    container_name: swifty_companion
+    stdin_open: true
+    tty: true
+    ports:
+      - "8081:8081"
+    volumes:
+      - .:/app
+      - /app/node_modules
+    environment:
+      - EXPO_PUBLIC_UID=${EXPO_PUBLIC_UID}
+      - EXPO_PUBLIC_SECRET=${EXPO_PUBLIC_SECRET}
