@@ -4,8 +4,6 @@ import PeerListItem from './PeerListItem';
 interface Peer {
     id: string;
     name: string;
-    level: number;
-    campus: string;
     avatar: string;
 }
 
@@ -18,7 +16,7 @@ export default function TopPeers({ peers, onSelect }: TopPeersProps) {
     return (
         <View className="w-full mt-8 flex-1">
             <Text className="text-ui-textSecondary font-bold text-sm tracking-wider uppercase mb-4 px-1">
-                Top Peers
+                Results
             </Text>
 
             <View className="w-full">

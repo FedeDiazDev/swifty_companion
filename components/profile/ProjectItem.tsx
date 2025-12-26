@@ -2,7 +2,7 @@ import { View, Text } from 'react-native';
 
 interface ProjectItemProps {
     name: string;
-    status: 'success' | 'failure' | 'inprogress';
+    status: 'success' | 'failure' | 'inprogress' | 'searching' | 'waiting';
     score?: number;
     timeAgo: string;
 }
@@ -12,6 +12,8 @@ export default function ProjectItem({ name, status, score, timeAgo }: ProjectIte
         switch (status) {
             case 'success': return 'bg-ui-success';
             case 'failure': return 'bg-ui-failure';
+            case 'searching': return 'bg-blue-500';
+            case 'waiting': return 'bg-orange-500';
             default: return 'bg-gray-500';
         }
     };
@@ -20,6 +22,8 @@ export default function ProjectItem({ name, status, score, timeAgo }: ProjectIte
         switch (status) {
             case 'success': return 'SUCCESS';
             case 'failure': return 'FAIL';
+            case 'searching': return 'SEARCHING';
+            case 'waiting': return 'WAITING';
             default: return 'IN PROGRESS';
         }
     };
@@ -28,6 +32,8 @@ export default function ProjectItem({ name, status, score, timeAgo }: ProjectIte
         switch (status) {
             case 'success': return 'text-ui-success';
             case 'failure': return 'text-ui-failure';
+            case 'searching': return 'text-blue-500';
+            case 'waiting': return 'text-orange-500';
             default: return 'text-gray-500';
         }
     };

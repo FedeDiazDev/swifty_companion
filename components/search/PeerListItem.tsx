@@ -4,8 +4,6 @@ import { Ionicons } from '@expo/vector-icons';
 interface Peer {
     id: string;
     name: string;
-    level: number;
-    campus: string;
     avatar: string;
 }
 
@@ -27,9 +25,7 @@ export default function PeerListItem({ peer, onSelect }: PeerListItemProps) {
 
             <View className="flex-1">
                 <Text className="text-white text-lg font-bold">{peer.name}</Text>
-                <Text className="text-gray-400 text-sm">
-                    Level {peer.level} • {peer.campus}
-                </Text>
+
             </View>
 
             <Ionicons name="chevron-forward" size={20} color="#64748b" />

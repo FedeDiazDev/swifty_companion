@@ -1,83 +1,149 @@
-import { View, Text, ScrollView, StatusBar, TouchableOpacity } from 'react-native';
+import { View, Text, ScrollView, StatusBar, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useEffect, useState } from 'react';
 import { Colors } from '@/constants/theme';
 import ProfileHeader from '@/components/profile/ProfileHeader';
-import ActionButtons from '@/components/profile/ActionButtons';
 import LevelCard from '@/components/profile/LevelCard';
 import StatsCard from '@/components/profile/StatsCard';
-import SkillItem from '@/components/profile/SkillItem';
-import ProjectItem from '@/components/profile/ProjectItem';
+import SkillsSection from '@/components/profile/SkillsSection';
+import ProjectsSection from '@/components/profile/ProjectsSection';
+import { getUserByLogin, getUserCoalition, User, Coalition } from '@/services/userService';
 
 export default function UserProfile() {
     const { login } = useLocalSearchParams();
     const router = useRouter();
 
-    // Mock User Data matching the design
-    const user = {
-        login: (login as string) || 'jdoe',
-        name: 'John Doe',
-        location: 'e1r4p8',
-        image_url: 'https://ui-avatars.com/api/?name=John+Doe&background=ffedd5&color=c2410c&size=256',
-        level: 12.45,
-        wallet: 520,
-        evalPoints: 12,
+    const [user, setUser] = useState<User | null>(null);
+    const [coalition, setCoalition] = useState<Coalition | null>(null);
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+
+    useEffect(() => {
+        const fetchUser = async () => {
+            if (!login) return;
+            setIsLoading(true);
+            try {
+                const data = await getUserByLogin(login as string);
+                setUser(data);
+                const coalitionData = await getUserCoalition(data.id);
+                setCoalition(coalitionData);
+
+            } catch (err) {
+                console.error(err);
+                setError("Failed to load user profile.");
+            } finally {
+                setIsLoading(false);
+            }
+        };
+        fetchUser();
+    }, [login]);
+
+    if (isLoading) {
+        return (
+            <SafeAreaView className="flex-1 bg-dark justify-center items-center">
+                <ActivityIndicator size="large" color="#0369a1" />
+            </SafeAreaView>
+        );
+    }
+
+    if (error || !user) {
+        return (
+            <SafeAreaView className="flex-1 bg-dark justify-center items-center">
+                <Text className="text-white text-lg font-bold">{error || "User not found"}</Text>
+                <TouchableOpacity onPress={router.back} className="mt-4">
+                    <Text className="text-primary text-lg">Go Back</Text>
+                </TouchableOpacity>
+            </SafeAreaView>
+        );
+    }
+
+    const mainCursus = user.cursus_users.find(c => c.cursus.slug.includes("42")) || user.cursus_users[0];
+    const userLevel = mainCursus?.level || 0;
+
+    let daysRemaining = null;
+    if (mainCursus?.blackholed_at) {
+        const bhDate = new Date(mainCursus.blackholed_at);
+        const now = new Date();
+        const diffTime = bhDate.getTime() - now.getTime();
+        daysRemaining = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    }
+    // console.log(mainCursus.skills);
+    const skills = mainCursus?.skills?.slice(0, 5).map(s => ({
+        name: s.name,
+        level: s.level,
+        color: Colors.skills.algo
+    })) || [];
+
+
+    const projects = user.projects_users
+        .map(p => {
+            let status: 'success' | 'failure' | 'inprogress' | 'searching' | 'waiting' = 'inprogress';
+            if (p["validated?"]) status = 'success';
+            else if (p.status === 'finished' && !p["validated?"]) status = 'failure';
+            else if (p.status === 'searching_a_group') status = 'searching';
+            else if (p.status === 'in_progress') status = 'inprogress';
+            else if (p.status === 'waiting_for_correction') status = 'waiting';
+
+            return {
+                name: p.project.name,
+                status,
+                score: p.final_mark,
+                timeAgo: p.marked_at ? new Date(p.marked_at).toLocaleDateString() : 'In Progress',
+                // Keep original data for sorting
+                marked_at: p.marked_at
+            };
+        })
+        .sort((a, b) => {
+            const statusPriority = {
+                'searching': 0,
+                'waiting': 1,
+                'inprogress': 2,
+                'success': 3,
+                'failure': 3
+            };
+
+            const priorityA = statusPriority[a.status];
+            const priorityB = statusPriority[b.status];
+
+            if (priorityA !== priorityB) {
+                return priorityA - priorityB;
+            }
+
+            return new Date(b.marked_at || 0).getTime() - new Date(a.marked_at || 0).getTime();
+        })
+        .slice(0, 7)
+    const headerUser = {
+        login: user.login,
+        name: user.displayname,
+        location: user.location || 'Unavailable',
+        image_url: user.image?.versions?.medium || user.image?.link,
     };
-
-    const skills = [
-        { name: 'Algorithms & AI', level: 6.20, color: Colors.skills.algo },
-        { name: 'Unix', level: 5.80, color: Colors.skills.unix },
-        { name: 'Graphics', level: 3.10, color: Colors.skills.graphics },
-        { name: 'Web', level: 2.50, color: Colors.skills.web },
-    ];
-
-    const projects = [
-        { name: 'ft_transcendence', status: 'success' as const, score: 125, timeAgo: 'Completed 2 days ago' },
-        { name: 'webserv', status: 'success' as const, score: 100, timeAgo: 'Completed 1 week ago' },
-        { name: 'cpp_module_09', status: 'failure' as const, score: 42, timeAgo: 'Failed 2 weeks ago' },
-        { name: 'inception', status: 'inprogress' as const, timeAgo: 'Started 3 weeks ago' },
-    ];
 
     return (
         <SafeAreaView className="flex-1 bg-dark">
             <StatusBar barStyle="light-content" />
             <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
 
-                {/* Header Section */}
-                <ProfileHeader user={user} />
+                <ProfileHeader
+                    user={headerUser}
+                    coalition={coalition}
+                    daysRemaining={daysRemaining}
+                />
 
-                {/* Action Buttons */}
-                <ActionButtons />
+                {/* <ActionButtons /> */}
 
-                {/* Level Card */}
-                <LevelCard level={user.level} />
+                <View className="px-6 mt-6">
+                    <LevelCard level={userLevel} />
+                </View>
 
-                {/* Stats Row */}
-                <View className="flex-row px-6 mb-8 gap-4">
+                <View className="flex-row justify-between px-6 mb-8 w-full">
                     <StatsCard icon="wallet" label="Wallet" value={`₳ ${user.wallet}`} />
-                    <StatsCard icon="star" label="Eval Points" value={`${user.evalPoints}`} />
+                    <StatsCard icon="star" label="Corr Points" value={`${user.correction_point}`} />
                 </View>
 
-                {/* Skills Section */}
-                <View className="px-6 mb-8">
-                    <View className="flex-row justify-between items-center mb-4">
-                        <Text className="text-white text-lg font-bold">Skills</Text>
-                        <TouchableOpacity>
-                            <Text className="text-primary text-sm font-bold">View All</Text>
-                        </TouchableOpacity>
-                    </View>
-                    {skills.map((skill, index) => (
-                        <SkillItem key={index} {...skill} />
-                    ))}
-                </View>
-
-                {/* Projects Section */}
-                <View className="px-6 mb-10">
-                    <Text className="text-white text-lg font-bold mb-4">Recent Projects</Text>
-                    {projects.map((project, index) => (
-                        <ProjectItem key={index} {...project} />
-                    ))}
-                </View>
+                <SkillsSection skills={skills} />
+                <ProjectsSection projects={projects} />
 
             </ScrollView>
         </SafeAreaView>

@@ -1,40 +1,58 @@
-import { View, Text, ScrollView, TouchableOpacity, StatusBar, Platform } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, StatusBar } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Stack, useRouter } from 'expo-router';
+import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useState } from 'react';
 import SearchBar from '@/components/search/SearchBar';
 import CustomButton from '@/components/common/CustomButton';
-import RecentSearches from '@/components/search/RecentSearches';
 import TopPeers from '@/components/search/TopPeers';
+import { searchUsers, User } from '@/services/userService';
+import { useConfirmSignOut } from '@/hooks/useConfirmSignOut';
 
 export default function SearchScreen() {
     const router = useRouter();
+    const handleSignOut = useConfirmSignOut();
     const [searchQuery, setSearchQuery] = useState('');
+    const [searchResults, setSearchResults] = useState<any[]>([]);
+    const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+    const handleSearch = async () => {
+        if (!searchQuery.trim()) return;
 
-    // Mock Data
-    const recentSearches = [
-        { id: '1', name: 'norminet', avatar: 'https://cdn.intra.42.fr/users/norminet.jpg' },
-        { id: '2', name: 'ekantene', initials: 'EK' },
-        { id: '3', name: 'zaphod', initials: 'Z' }, // Fallback color
-    ];
+        setIsLoading(true);
+        setError(null);
+        try {
+            const users = await searchUsers(searchQuery);
 
-    const topPeers = [
-        { id: '1', name: 'vbaron', level: 21, campus: '42 Paris', avatar: 'https://ui-avatars.com/api/?name=vbaron&background=ffedd5&color=c2410c' },
-        { id: '2', name: 'alovelace', level: 18, campus: '42 Fremont', avatar: 'https://ui-avatars.com/api/?name=alovelace&background=ffedd5&color=c2410c' },
-    ];
+            const mappedPeers = users.map((u: User) => ({
+                id: u.id.toString(),
+                name: u.login,
+                avatar: u.image?.versions?.medium || u.image?.link,
+            }));
+
+            setSearchResults(mappedPeers);
+
+            if (users.length === 0) {
+                setError("No peers found.");
+            }
+
+        } catch (err) {
+            console.error(err);
+            setError("Failed to search users.");
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     return (
         <SafeAreaView className="flex-1 bg-dark pt-8">
             <StatusBar barStyle="light-content" />
 
             <View className="flex-row justify-between items-center px-6 py-4">
-                <TouchableOpacity onPress={() => router.back()}>
-                    <Ionicons name="arrow-back" size={24} color="white" />
-                </TouchableOpacity>
+                <View className="w-6" />
                 <Text className="text-white text-lg font-bold">Student Search</Text>
-                <TouchableOpacity>
-                    <Ionicons name="ellipsis-vertical" size={24} color="white" />
+                <TouchableOpacity onPress={handleSignOut}>
+                    <Ionicons name="log-out-outline" size={24} color="white" />
                 </TouchableOpacity>
             </View>
 
@@ -45,7 +63,7 @@ export default function SearchScreen() {
                     </View>
                     <Text className="text-white text-3xl font-bold mb-2">Find a 42 Peer</Text>
                     <Text className="text-gray-400 text-center px-4">
-                        View skills, projects, and levels by entering a student login.
+                        Enter a login to view their profile.
                     </Text>
                 </View>
 
@@ -58,22 +76,22 @@ export default function SearchScreen() {
                 </View>
 
                 <CustomButton
-                    title="Search Profile"
-                    handlePress={() => { }}
+                    title={isLoading ? "Searching..." : "Search Profile"}
+                    handlePress={handleSearch}
+                    isLoading={isLoading}
                     containerStyles="w-full bg-secondary mb-2"
                     icon={<Ionicons name="search" size={20} color="white" />}
                 />
 
-                <RecentSearches
-                    recents={recentSearches}
-                    onClear={() => { }}
-                    onSelect={(item) => router.push(`/user/${item.name}`)}
-                />
-
-                <TopPeers
-                    peers={topPeers}
-                    onSelect={(peer) => router.push(`/user/${peer.name}`)}
-                />
+                {error && (
+                    <Text className="text-red-500 text-center mt-4 font-bold">{error}</Text>
+                )}
+                {searchResults.length > 0 && (
+                    <TopPeers
+                        peers={searchResults}
+                        onSelect={(peer) => router.push(`/user/${peer.name}`)}
+                    />
+                )}
 
                 <View className="h-10" />
             </ScrollView>

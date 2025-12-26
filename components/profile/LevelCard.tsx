@@ -9,7 +9,7 @@ export default function LevelCard({ level }: LevelCardProps) {
     const percentage = Math.round((level - levelInt) * 100);
 
     return (
-        <View className="mx-6 bg-dark-card rounded-2xl p-5 mb-4 border border-ui-border">
+        <View className="bg-dark-card rounded-2xl p-5 mb-4 border border-ui-border">
             <View className="flex-row justify-between items-end mb-4">
                 <Text className="text-ui-textSecondary font-bold text-xs tracking-widest uppercase mb-1">
                     LEVEL

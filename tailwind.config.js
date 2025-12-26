@@ -17,6 +17,7 @@ module.exports = {
                     failure: '#ef4444',
                     warning: '#f59e0b',
                     textSecondary: '#94a3b8',
+                    border: '#334155',
                 },
                 skills: {
                     algo: '#8b5cf6',

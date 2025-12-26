@@ -10,7 +10,7 @@ interface StatsCardProps {
 
 export default function StatsCard({ icon, label, value, color = "white" }: StatsCardProps) {
     return (
-        <View className="flex-1 bg-dark-card rounded-2xl p-4 border border-ui-border">
+        <View className="w-[48%] bg-dark-card rounded-2xl p-4 border border-ui-border">
             <View className="flex-row items-center mb-3">
                 <Ionicons name={icon} size={18} color="#94a3b8" />
                 <Text className="text-ui-textSecondary font-bold text-xs tracking-widest uppercase ml-2">
