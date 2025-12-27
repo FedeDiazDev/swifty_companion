@@ -78,7 +78,3 @@ This project includes a Docker configuration for easy setup.
 - **Styling**: NativeWind (TailwindCSS)
 - **Navigation**: Expo Router
 - **API**: 42 API
-
-## License
-
-This project is licensed under the MIT License.
