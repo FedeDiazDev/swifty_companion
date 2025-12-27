@@ -46,11 +46,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     useEffect(() => {
         if (isLoading) return;
 
-        const inAuthGroup = segments[0] === '(app)';
+        const inAuthGroup = (segments as string[])[0] === '(app)';
+        const inLoginGroup = (segments as string[])[0] === '(auth)';
 
         if (!accessToken && inAuthGroup) {
-            router.replace('/');
-        } else if (accessToken && !inAuthGroup) {
+            router.replace('/login' as any);
+        } else if (accessToken && inLoginGroup) {
             router.replace('/search');
         }
     }, [accessToken, segments, isLoading]);
