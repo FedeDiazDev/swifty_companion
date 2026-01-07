@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "swifty_proteins",
-    "slug": "swifty_proteins",
+    "name": "swifty_companion",
+    "slug": "swifty_companion",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
